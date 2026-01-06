@@ -1,3 +1,9 @@
+#!/usr/bin/env python3
+"""
+Telegram File Storage Bot - Fixed Version
+Direct RDP file storage with version management
+"""
+
 import os
 import sys
 import logging
@@ -208,29 +214,29 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     
     welcome_msg = f"""
-    🤖 **Welcome {user.first_name}!** 🤖
+<b>🤖 Welcome {user.first_name}! 🤖</b>
+
+<b>📁 RDP File Storage Bot 📁</b>
+
+<b>Your ID:</b> <code>{user.id}</code>
+<b>Storage Path:</b> <code>{BASE_PATH}</code>
+
+<b>Commands:</b>
+/start - Show this message
+/new <project_name> - Create new project
+/projects - List all projects
+/upload - Upload files
+/info <project> - Project info
+/clean - Cleanup temporary files
+/space - Check storage space
+
+<b>How to use:</b>
+1. Create project: /new MyProject
+2. Upload files: /upload
+3. Files auto-saved with versioning
+"""
     
-    📁 **RDP File Storage Bot** 📁
-    
-    **Your ID:** `{user.id}`
-    **Storage Path:** `{BASE_PATH}`
-    
-    **Commands:**
-    /start - Show this message
-    /new <project_name> - Create new project
-    /projects - List all projects
-    /upload - Upload files
-    /info <project> - Project info
-    /clean - Cleanup temporary files
-    /space - Check storage space
-    
-    **How to use:**
-    1. Create project: /new MyProject
-    2. Upload files: /upload
-    3. Files auto-saved with versioning
-    """
-    
-    await update.message.reply_text(welcome_msg, parse_mode='Markdown')
+    await update.message.reply_text(welcome_msg, parse_mode='HTML')
 
 async def new_project(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /new command to create project"""
@@ -247,12 +253,12 @@ async def new_project(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if storage_bot.create_project(project_name):
         project_path = storage_bot.base_path / project_name
         await update.message.reply_text(
-            f"✅ **Project Created!**\n\n"
-            f"**Name:** `{project_name}`\n"
-            f"**Path:** `{project_path}`\n"
-            f"**First Version:** `v1.0`\n\n"
+            f"✅ <b>Project Created!</b>\n\n"
+            f"<b>Name:</b> <code>{project_name}</code>\n"
+            f"<b>Path:</b> <code>{project_path}</code>\n"
+            f"<b>First Version:</b> <code>v1.0</code>\n\n"
             f"Now upload files with /upload",
-            parse_mode='Markdown'
+            parse_mode='HTML'
         )
     else:
         await update.message.reply_text(f"❌ Project '{project_name}' already exists!")
@@ -269,17 +275,17 @@ async def list_projects_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("📭 No projects found. Create one with /new")
         return
     
-    projects_text = "📂 **Your Projects:**\n\n"
+    projects_text = "<b>📂 Your Projects:</b>\n\n"
     for project in projects:
         info = storage_bot.get_project_info(project)
         if info:
             version_count = len(info.get("versions", []))
             file_count = info.get("total_files", 0)
-            projects_text += f"• **{project}** - {version_count} versions, {file_count} files\n"
+            projects_text += f"• <b>{project}</b> - {version_count} versions, {file_count} files\n"
         else:
-            projects_text += f"• **{project}**\n"
+            projects_text += f"• <b>{project}</b>\n"
     
-    await update.message.reply_text(projects_text, parse_mode='Markdown')
+    await update.message.reply_text(projects_text, parse_mode='HTML')
 
 async def upload_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /upload command"""
@@ -310,8 +316,9 @@ async def upload_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     await update.message.reply_text(
-        "📤 **Select project for upload:**",
-        reply_markup=reply_markup
+        "📤 <b>Select project for upload:</b>",
+        reply_markup=reply_markup,
+        parse_mode='HTML'
     )
 
 async def project_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -323,7 +330,7 @@ async def project_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['upload_project'] = project_name
     
     await query.edit_message_text(
-        f"✅ **Selected:** `{project_name}`\n\n"
+        f"✅ <b>Selected:</b> <code>{project_name}</code>\n\n"
         f"📤 Now send me files (images, documents, videos, etc.)\n"
         f"📁 Auto-saved with versioning\n"
         f"📊 Auto-categorized by file type"
@@ -384,15 +391,15 @@ async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
         version = storage_bot.get_next_version(project)
         
         await update.message.reply_text(
-            f"✅ **File Saved Successfully!**\n\n"
-            f"📁 Project: `{project}`\n"
-            f"🔖 Version: `{version}`\n"
-            f"📄 File: `{filename}`\n"
-            f"📂 Category: `{category}`\n"
-            f"📊 Type: `{file_type}`\n"
-            f"💾 Size: `{size_str}`\n"
-            f"📍 Path: `{saved_path}`",
-            parse_mode='Markdown'
+            f"✅ <b>File Saved Successfully!</b>\n\n"
+            f"📁 <b>Project:</b> <code>{project}</code>\n"
+            f"🔖 <b>Version:</b> <code>{version}</code>\n"
+            f"📄 <b>File:</b> <code>{filename}</code>\n"
+            f"📂 <b>Category:</b> <code>{category}</code>\n"
+            f"📊 <b>Type:</b> <code>{file_type}</code>\n"
+            f"💾 <b>Size:</b> <code>{size_str}</code>\n"
+            f"📍 <b>Path:</b> <code>{saved_path}</code>",
+            parse_mode='HTML'
         )
         
     except Exception as e:
@@ -426,22 +433,22 @@ async def project_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     size_mb = total_size / (1024 * 1024)
     
     info_text = f"""
-    📊 **Project Info:** `{project}`
-    
-    📅 Created: `{info.get('created', 'N/A')}`
-    🔢 Versions: `{len(info.get('versions', []))}`
-    📄 Total Files: `{info.get('total_files', 0)}`
-    💾 Size: `{size_mb:.2f} MB`
-    
-    **Versions:**
-    """
+<b>📊 Project Info:</b> <code>{project}</code>
+
+<b>📅 Created:</b> <code>{info.get('created', 'N/A')}</code>
+<b>🔢 Versions:</b> <code>{len(info.get('versions', []))}</code>
+<b>📄 Total Files:</b> <code>{info.get('total_files', 0)}</code>
+<b>💾 Size:</b> <code>{size_mb:.2f} MB</code>
+
+<b>Versions:</b>
+"""
     
     for ver in sorted(info.get('versions', [])):
         ver_path = project_path / ver
         ver_files = len([f for f in ver_path.rglob("*") if f.is_file()])
-        info_text += f"\n• `{ver}` - {ver_files} files"
+        info_text += f"\n• <code>{ver}</code> - {ver_files} files"
     
-    await update.message.reply_text(info_text, parse_mode='Markdown')
+    await update.message.reply_text(info_text, parse_mode='HTML')
 
 async def storage_space(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /space command"""
@@ -465,20 +472,20 @@ async def storage_space(update: Update, context: ContextTypes.DEFAULT_TYPE):
     total, used, free = shutil.disk_usage("/")
     
     space_text = f"""
-    💽 **Storage Information**
+<b>💽 Storage Information</b>
+
+<b>📦 Projects:</b> <code>{total_projects}</code>
+<b>📄 Files:</b> <code>{total_files}</code>
+<b>📊 Bot Storage:</b> <code>{total_size/(1024*1024):.2f} MB</code>
+
+<b>Disk Space:</b>
+<b>💾 Total:</b> <code>{total/(1024**3):.2f} GB</code>
+<b>📈 Used:</b> <code>{used/(1024**3):.2f} GB</code>
+<b>📉 Free:</b> <code>{free/(1024**3):.2f} GB</code>
+<b>📍 Path:</b> <code>{BASE_PATH}</code>
+"""
     
-    📦 Projects: `{total_projects}`
-    📄 Files: `{total_files}`
-    📊 Bot Storage: `{total_size/(1024*1024):.2f} MB`
-    
-    **Disk Space:**
-    💾 Total: `{total/(1024**3):.2f} GB`
-    📈 Used: `{used/(1024**3):.2f} GB`
-    📉 Free: `{free/(1024**3):.2f} GB`
-    📍 Path: `{BASE_PATH}`
-    """
-    
-    await update.message.reply_text(space_text, parse_mode='Markdown')
+    await update.message.reply_text(space_text, parse_mode='HTML')
 
 async def cleanup(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /clean command"""
@@ -503,15 +510,15 @@ async def broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
     projects = storage_bot.list_projects()
     
     status = f"""
-    📢 **Bot Status Report**
+<b>📢 Bot Status Report</b>
+
+✅ Bot is running
+<b>📁 Total Projects:</b> {len(projects)}
+<b>💾 Storage:</b> {BASE_PATH}
+<b>🕐 Time:</b> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+"""
     
-    ✅ Bot is running
-    📁 Total Projects: {len(projects)}
-    💾 Storage: {BASE_PATH}
-    🕐 Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-    """
-    
-    await update.message.reply_text(status, parse_mode='Markdown')
+    await update.message.reply_text(status, parse_mode='HTML')
 
 # ============ MAIN FUNCTION ============
 
