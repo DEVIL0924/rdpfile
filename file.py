@@ -2,7 +2,7 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, MessageHandler, CommandHandler, ContextTypes, filters
 import os, zipfile, subprocess, shutil, time
 
-BOT_TOKEN = "8476220678:AAFQ_QbaqGKo_KexouiuT-6e-SZMjuMmZ2k"
+BOT_TOKEN = "8259774690:AAEz5zHmwz6CfFodxRk621kZFFFIPp1f668"
 OWNER_ID = 7521375632     # apna Telegram user id yaha daalna
 ROOT_DIR = "/root"
 
